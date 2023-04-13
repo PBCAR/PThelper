@@ -13,19 +13,17 @@ price_prep(pt, id_var, vars, prices)
 
 \item{vars}{The names of variables which make up the purchase task.}
 
-\item{prices}{The prices associated with each `vars` **in the same order**.}
+\item{prices}{The prices associated with each variable name in the same order as the `vars`.}
+}
+\value{
+A data frame with `vars` variables renamed, as well as `id_var`
 }
 \description{
-This function helps users efficiently rename their variables as prices, which is essential
-to processing purchase task data. At the same time, it will return only the variables required
-for purchase task processing -- the unique identifier and the purchase task variables themselves,
-making it easy for non-R users to select the variables they need.
+This function helps users efficiently rename their variables as prices, which is essential to processing purchase task data.
+At the same time, it will return only the variables required for purchase task processing -- the unique identifier and the
+purchase task variables themselves.
 }
 \examples{
-\dontrun{
-pt <- price_prep(pt, id_var = "ID",
-vars = c("cpt0","cpt1","cpt2","cpt3","cpt4","cpt5","cpt6",
-"cpt7","cpt8","cpt9","cpt10"),
-prices = c("0","0.05","0.10","0.25","0.50","0.75","1","2","5","10"))
-}
+pt <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
+prices = c("0","0.05","0.10","0.20","0.30","0.40","0.50", "0.75","1","2","3","4","5","7.5","10"))
 }

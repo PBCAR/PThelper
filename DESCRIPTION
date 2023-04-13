@@ -1,14 +1,17 @@
 Package: PThelper
 Type: Package
-Title: The Systematic Cleaning and Processing of Purchase Task Data: An R Statistical Package
-Version: 0.1.5
+Title: The Systematic Cleaning and Processing of Purchase Task Data
+Version: 0.2.0
 Authors@R: c(person("Kyla","Belisario", role = c("aut", "cre", "trl"), email = "kyla_belisario@protonmail.com", comment = c(ORCID = "0000-0001-5403-9531")),
     person("Ben","Goodman", role = c("aut", "trl")),
     person("Meenu","Minhas", role = c("aut"), comment = c(ORCID = "0000-0001-6741-3940")),
     person("James","MacKillop", role = c("aut"), comment = c(ORCID = "0000-0002-8695-1071")))
-Description: This package introduces a series of steps needed to clean and process purchase task data. The PThelper package consists of 8 different functions to walk users through 3 different stages of purchase task processing: i) The pre-processing stage of the raw data; ii) The calculation of elasticity and derived indices stage via curve-fitting; and iii) The index-level purchase task variable management.
+Description: This package introduces a series of steps needed to clean, process, and use purchase task data. The PThelper package consists of 10 different functions
+    to walk users through 3 different stages of purchase task processing: i) The pre-processing stage of the raw data; ii) The calculation of empirical indices and 
+    elasticity via curve-fitting; and iii) The index-level purchase task variable management.
 License: MIT + file LICENSE
-Imports: utils, stats, psych, beezdemand, ggplot2, ggrepel, DT, knitr
+Imports: stats, psych, ggplot2, reshape2
+Depends: R (>= 3.5.0)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.2

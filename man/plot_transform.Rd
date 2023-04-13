@@ -9,16 +9,12 @@ plot_transform(pt, pt_var)
 \arguments{
 \item{pt}{A data frame consisting of the purchase variable `pt_var` to visualize.}
 
-\item{pt_var}{The name of the purchase task index-level variable to visualize, as
-identified in the data frame.}
+\item{pt_var}{The name of the purchase task index-level variable to visualize, as identified in the data frame.}
+}
+\value{
+A ggplot2 graphical object
 }
 \description{
-This function helps users to visualize their purchase task (index-level) variables
-to determine whether a transformation of log10 or square-root would be best to use.
-}
-\examples{
-\dontrun{
-## Visualization of Intensity
-plot_transform(pt, pt_var = "Intensity")
-}
+This function helps users to visualize their purchase task (index-level) variables to determine whether a transformation of
+log10 or square-root would be best to use.
 }

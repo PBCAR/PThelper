@@ -7,6 +7,7 @@
 pt_qc(
   pt,
   id_var,
+  type,
   delta_q = 0.025,
   bounce_type = "initial",
   jump = 0.25,
@@ -16,36 +17,47 @@ pt_qc(
 )
 }
 \arguments{
-\item{pt}{A list consisting of two data frames: "data" which consists of the `id_var` and purchase task variables, and the "qc_data" which provides details on
-the results of the quality control for all IDs.}
+\item{pt}{A data frame consisting of the `id_var` and purchase task variables.}
 
 \item{id_var}{The name of the unique identifier (ID) as identified in the data frame.}
 
-\item{delta_q}{The log10-unit reduction in consumption from the first to last price. The default is set to 0.025 (suggested by Stein et al., 2015),
-with values lower than 0.025 deemed non-systematic.}
+\item{type}{The type of QC to apply, one of c("full","partial"). The "full" type of QC processing is used to process PT data which
+administers all price points, regardless of consumption responses. The "partial" type of QC processing is used to process PT data
+which uses consumption responses to determine when to end administration, either at the first instance when consumption reaches zero,
+or zero consumption at the end of a price array. Additionally, for type "partial", zero responses will be added to items not
+administered.}
 
-\item{bounce_type}{The type of bounce criterion applied, one of c("initial","p2p"). The default is "initial", which follows the criterion put forth by
-Stein et al. (2015). This method defines what constistutes a `jump`, with all subsequent prices in the purchase task being compared to the consumption
-at the first price. The "p2p" option is a proposed alternative, which considers any increases in consumption from one price to the next to be a `jump`
-in consumption. Both methods make use of the `bounce_val` which will only exclude participants above a set threshold of jumps.}
+\item{delta_q}{The log10-unit reduction in consumption from the first to last price. The default is set to 0.025 (suggested by Stein
+et al., 2015), with values lower than 0.025 deemed non-systematic. If there is zero consumption at intensity (lowest price), participants
+are not excluded, and instead will be given a delta Q value of NA.}
 
-\item{jump}{Expressed as a proportion, the jump value is the percent increase in consumption at first price used to define an excessive increase in
-consumption. The default is 0.25 (25% as suggested by Stein et al., 2015), meaning that any consumption 25% higher than consumption at first price
-would be considered an excessive jump in consumption.}
+\item{bounce_type}{The type of bounce criterion applied, one of c("initial","p2p"). The default is "initial", which follows and
+defines what constitutes a `jump`, with all subsequent prices in the purchase task being compared to the consumption at the first
+price. The "p2p" option is a proposed alternative, which considers any increases in consumption from one price to the next to be a
+ `jump` in consumption. Both methods make use of the `bounce_val` which will only exclude participants above a set threshold of jumps.}
 
-\item{bounce_val}{Expressed as a proportion, the bounce value is used as a threshold to identify excessive inconsistencies in responses. The
-default bounce value is 0.1. IDs exceeding this bounce value are removed.}
+\item{jump}{Expressed as a proportion, the jump value is the percent increase in consumption at first price used to define an
+excessive increase in consumption. The default is 0.25 (25% as suggested by Stein et al., 2015), meaning that any consumption 25%
+higher than consumption at first price would be considered an excessive jump in consumption when using the `bounce_type` "initial".}
 
-\item{rev_n}{The number of acceptable reversals from zero, one of c(0,1). The default number is 0, meaning no reversals from zero are allowed.}
+\item{bounce_val}{Expressed as a proportion, the bounce value is used as a threshold to identify excessive inconsistencies in
+responses. The default bounce value is 0.1. IDs exceeding this bounce value are removed.}
 
-\item{cons_0}{The number of consecutive zeroes to signify a reversal from zero, one of c(1,2). The default is 1. Previously named `cons_n`.
-the {beezdemand} package. The default number of consecutive zeroes is 2.}
+\item{rev_n}{The number of acceptable reversals from zero, one of c(0,1). The default number is 0, meaning no reversals from zero
+are allowed.}
+
+\item{cons_0}{The number of consecutive zeroes to signify a reversal from zero, one of c(1,2). The default is 1.}
+}
+\value{
+A list consisting of two data frames: "data" which consists of the `id_var` and purchase task variables, and the
+"qc_data" which provides details on the results of the quality control for all IDs.
 }
 \description{
 This function helps users to conduct quality control on purchase task data to remove non-systematic data. Specifically, this function
 identifies and removes IDs with: i) trend violations; ii) excessive bounce ratios; and iii) excessive reversals in responses. Quality
-control options follow the proposed 3-criterion method by Stein et al. (2015), but also allow for customization, as well as use of
-another option for bounce criterion used at PBCAR.
+control options follow the proposed 3-criterion method by Stein et al. (2015), but also allow for customization. Additionally, quality
+control can be applied to purchase task data in which not all prices were administered, such as in the case that administration of the
+purchase task ceased after first breakpoint, or after zero consumption was reached within a price array.
 }
 \details{
 Stein, J. S., Koffarnus, M. N., Snider, S. E., Quisenberry, A. J., & Bickel, W. K. (2015).
@@ -53,11 +65,12 @@ Identification and management of nonsystematic purchase task data: Toward best p
 Experimental and clinical psychopharmacology, 23(5), 377.
 }
 \examples{
-\dontrun{
-## Using default values:
-pt1 <- pt_qc(pt, id_var = "ID")
-## Customizing the third criterion (number of reversals):
-## This identifies and removes IDs with any reversals (with a reversal defined as 1 zero value).
-pt2 <- pt_qc(pt, id_var = "ID", cons_n = 1)
-}
+### ---------- PT PREP:
+cpt_data <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
+price = c("0","0.05","0.10","0.20","0.30","0.40","0.50","0.75","1","2","3","4","5","7.5","10"))
+
+cpt_data <- pt_prep(cpt_data, id_var = "ID", partial = TRUE)
+
+### ---------- PT QC:
+PT <- pt_qc(cpt_data, id_var = "ID", type = "partial")
 }

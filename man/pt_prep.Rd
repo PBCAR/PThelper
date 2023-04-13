@@ -4,7 +4,7 @@
 \alias{pt_prep}
 \title{PT PREP}
 \usage{
-pt_prep(pt, id_var, max_val = NULL)
+pt_prep(pt, id_var, max_val = NULL, partial = FALSE)
 }
 \arguments{
 \item{pt}{A data frame consisting of the `id_var` and purchase task variables.}
@@ -12,14 +12,19 @@ pt_prep(pt, id_var, max_val = NULL)
 \item{id_var}{The name of the unique identifier (ID) as found in the data frame.}
 
 \item{max_val}{Optional identification of a maximum allowed response for any given price point.}
+
+\item{partial}{Optional logical statement whether the purchase task administered was not administered in full. Default is
+FALSE. If partial is set to TRUE, then individuals whose last non-missing price does not equate to zero are identified (and removed).}
+}
+\value{
+A data frame with the length of participants who reach zero consumption (except at final price point administered)
 }
 \description{
-This function helps users prep their data by i) assigning zero values for remaining
-items not administered; ii) identifying missing data by ID; and (optional)
-iii) re-assigning the maximum value allowed at any price point.
+This function helps users prep their data by: i) identifying and removing participants with missing responses across all items;
+ii) (optional) re-assigning the maximum value allowed at any price point; and for purchase tasks which are not administered in
+full, iii) identifying and removing participants who do not have zero consumption at the final price point (except in instances
+of the final price point being reached).
 }
 \examples{
-\dontrun{
-pt <- pt_prep(pt, id_var = "ID", max_val = 99)
-}
+pt <- pt_prep(cpt_data, id_var = "ID", max_val = 99, partial = TRUE)
 }
