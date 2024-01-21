@@ -38,21 +38,25 @@ A list consisting of two data frames: "data" which consists of the `id_var` and 
 "wins_table" which provides details on which value(s) by `id_var` were winsorized (values before and after provided).
 }
 \description{
-This function helps users to manage outliers at the price level, or at the indicator level by using winsorization techniques. There are 3 options:
+This function helps users to manage outliers at the price level, or at the indicator level by using winsorization techniques. See details for the different options.
 }
 \details{
+There are 3 winsorization options:
+
 i) Option 1 replaces outliers with the maximum non-outlying value rounded up;
 ii) Option 2 replaces outliers with a value 1 higher than highest (or 1 lower than the lowest) non-outlying value; or
 iii) outlying values are replaced with 1 value above the next highest non-outlying value to maintain order.
 }
 \examples{
 
-##### Example Data
-pt <- data.frame("ID" = c(1:20),
-"Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,7,5,0),
-"Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,0.5,0.5,0))
+### --- Example Data
+pt <- data.frame("ID" = c(1:36),
+"Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,
+                7,5,0,2,3,5,6,10,15,12,7,0,9,0,6,7,8,4,5),
+"Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,
+                 0.5,0.5,0,3,2,2,1,2,3,4,1,0,2,0,5,5,7.5,2,3))
 
-##### Function Example
+### --- Function Example
 pt2 <- pt_winsor(pt, id_var = "ID", level = "indicator", index_var = c("Intensity"), delta = 1)
 
 }

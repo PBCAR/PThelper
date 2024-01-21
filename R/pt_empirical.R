@@ -6,17 +6,17 @@
 #' @param id_var The name of the unique identifier as identified in the data frame.
 #' @examples
 #'
-#' ##### Load Data
+#' ### --- Load Data
 #' data("cpt_data")
 #'
-#' ##### Prep Data
+#' ### --- Prep Data
 #' pt <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
 #' prices = c("0","0.05","0.10","0.20","0.30","0.40","0.50", "0.75","1","2","3","4","5","7.5","10"))
 #'
 #' pt2 <- pt_prep(pt, id_var = "ID", remove0 = TRUE, max_val = 99)
-#' pt3 <- pt_qc(pt2, id_var = "ID", type = "partial", bounce_type = "p2p")
+#' pt3 <- pt_qc(pt2, id_var = "ID", type = "partial")
 #'
-#' ##### Function Example
+#' ### --- Function Example
 #' pt4 <- pt_empirical(pt3$data,id_var = "ID")
 #'
 #' @return A data frame
@@ -24,12 +24,20 @@
 
 pt_empirical <- function(pt, id_var){
 
+  if(!is.data.frame(pt)) stop(rlang::format_error_bullets(c( x = c("'pt' must be a data frame."))), call. = FALSE)
+
   pt_orig <- pt
   pt_names <- names(pt)
-  prices <- pt_names[pt_names!=id_var & pt_names!="Q0" & pt_names!="Alpha" & pt_names!="R2"]
+  var_exclude <- c("Alpha","Q0","UnitElasticity","R2","Eta","AUC")
+  prices <- pt_names[pt_names!=id_var & !pt_names %in% var_exclude]
   names(pt)[names(pt) == id_var] <- "id"
 
   pt <- pt[c("id",prices)]
+
+  suppressWarnings({
+    if(length(prices[is.na(as.numeric(prices))])==length(prices)) stop(rlang::format_error_bullets(c( x = c("Names of purchase task variables must be numeric. Use `price_prep()` to rename variables."))), call. = FALSE)
+    if(length(prices[is.na(as.numeric(prices))])>0) stop(rlang::format_error_bullets(c( x = c("Variables other than 'id_var' and the purchase task items are detected. Please include only the variables required."))), call. = FALSE)
+  })
 
   ### --- Calculate Empirical Q0 (Intensity) and BP
 
@@ -56,25 +64,15 @@ pt_empirical <- function(pt, id_var){
     pt_dat_i <- pt_long[(pt_long$id == id_num),]
 
     omax_i <- max(pt_dat_i$expenditure)
-    colnames(pt_summ_dat) <- c("id","omax")
 
-    pmax_i <- min(pt_dat_i$c[pt_dat_i$expenditure==omax_i])
+    pmax_i <- max(pt_dat_i$c[pt_dat_i$expenditure==omax_i])
+
+    pmax_i[omax_i==0] <- 0 ## previous uses of min price above meant this line of code wasn't needed.
 
     dat_i <- data.frame(id = id_num, omax = omax_i, pmax = pmax_i)
 
     pt_all <- rbind(pt_all,dat_i)
   }
-
-  ### --- Calculate Empirical OMAX and PMAX: NOT CORRECT FOR THOSE WITH ZERO CONSUMPTION
-
-  # pt_omax <- stats::aggregate(pt_long[c("expenditure")], by = list(id = pt_long[,"id"]), function(x) max(x, na.rm = T))
-  # pt_omax$omax <- pt_omax$expenditure
-  #
-  # pt_long <- merge(pt_long,pt_omax[c("id","omax")], by = "id", all.x = T)
-  # pt_long$max_price <- ifelse(pt_long$omax==pt_long$expenditure,min(pt_long$c[pt_long$expenditure==pt_long$omax]),NA)
-  # pt_pmax <- stats::aggregate(pt_long[c("max_price")], by = list(id = pt_long[,"id"]), function(x) max(x, na.rm = T))
-  # pt_pmax$pmax <- pt_pmax$max_price
-  # pt_max <- merge(pt_omax[c("id","omax")],pt_pmax[c("id","pmax")], by = "id", all.x = T)
 
   ### MERGE INDICATORS in final data set
   pt_final <- merge(pt[c("id","q0","bp")],pt_all, by = "id", all.x = T)

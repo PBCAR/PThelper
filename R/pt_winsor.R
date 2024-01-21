@@ -1,6 +1,8 @@
 #' `pt_winsor()`
 #'
-#' This function helps users to manage outliers at the price level, or at the indicator level by using winsorization techniques. There are 3 options:
+#' This function helps users to manage outliers at the price level, or at the indicator level by using winsorization techniques. See details for the different options.
+#'
+#' There are 3 winsorization options:
 #'
 #' i) Option 1 replaces outliers with the maximum non-outlying value rounded up;
 #' ii) Option 2 replaces outliers with a value 1 higher than highest (or 1 lower than the lowest) non-outlying value; or
@@ -19,12 +21,14 @@
 #' must be defined by the user. For elasticity, a small value of 0.001 is recommended.
 #' @examples
 #'
-#' ##### Example Data
+#' ### --- Example Data
 #' pt <- data.frame("ID" = c(1:36),
-#' "Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,7,5,0,2,3,5,6,10,15,12,7,0,9,0,6,7,8,4,5),
-#' "Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,0.5,0.5,0,3,2,2,1,2,3,4,1,0,2,0,5,5,7.5,2,3))
+#' "Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,
+#'                 7,5,0,2,3,5,6,10,15,12,7,0,9,0,6,7,8,4,5),
+#' "Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,
+#'                  0.5,0.5,0,3,2,2,1,2,3,4,1,0,2,0,5,5,7.5,2,3))
 #'
-#' ##### Function Example
+#' ### --- Function Example
 #' pt2 <- pt_winsor(pt, id_var = "ID", level = "indicator", index_var = c("Intensity"), delta = 1)
 #'
 #' @return A list consisting of two data frames: "data" which consists of the `id_var` and `pt` including the winsorized value(s); and
@@ -33,11 +37,13 @@
 
 pt_winsor <- function(pt, id_var, level = "price", z_val = 3.99, option = 3, index_var = NULL, delta = NULL) {
 
-  if(is.null(delta) & option==3 & level =="indicator") stop(rlang::format_error_bullets(c( x = "Delta value required for this winsorization option!")))
+  if(is.null(delta) & option==3 & level == "indicator") stop(rlang::format_error_bullets(c( "!" = c("Delta value required for this winsorization option."))), .call = FALSE)
+  if(is.null(index_var) & level == "indicator") stop(rlang::format_error_bullets(c( "!" = c("Indicator variable ('index_var') must be defined to use indicator-level winsorization."))), .call = FALSE)
+  if(!is.data.frame(pt)) stop(rlang::format_error_bullets(c( x = c("'pt' must be a data frame."))), call. = FALSE)
 
   pt_names <- names(pt)
 
-  ### --- PRICE LEVEL
+  ##### ----- PRICE LEVEL
 
   if(level=="price"){
 
@@ -101,7 +107,7 @@ pt_winsor <- function(pt, id_var, level = "price", z_val = 3.99, option = 3, ind
 
     }
 
-    # IDENTIFY IDs with winsorization changes
+    ### IDENTIFY IDs with winsorization changes
     pt_winsor <- data.frame(ID=character(),
                             Price=numeric(),
                             Original_Value=integer(),
@@ -126,13 +132,12 @@ pt_winsor <- function(pt, id_var, level = "price", z_val = 3.99, option = 3, ind
 
     pt_final <- list(data = as.data.frame(pt2), wins_table = as.data.frame(pt_winsor))
 
-  }
 
-  ### --- INDICATOR LEVEL
+    ##### ----- INDICATOR LEVEL
 
-  ### ALLOWS PROCESSING OF MULTIPLE INDICATORS
+  } else if(level=="indicator"){
 
-  if(level=="indicator"){
+    if(!index_var %in% names(pt)) stop(rlang::format_error_bullets(c( x = c("The indicator variable ('index_var') does not exist within 'pt'."))), call. = FALSE)
 
     names(pt)[names(pt) == id_var] <- "id"
     pt2 <- pt[!is.na(pt[,c(index_var)]),]
@@ -186,7 +191,7 @@ pt_winsor <- function(pt, id_var, level = "price", z_val = 3.99, option = 3, ind
 
     }
 
-    # IDENTIFY IDs with winsorization changes
+    ### IDENTIFY IDs with winsorization changes
     pt_winsor <- merge(pt[c("id",index_var)],pt2[c("id",index_var)], by = "id", all.x = TRUE)
     colnames(pt_winsor) <- c(id_var,"Old","New")
 

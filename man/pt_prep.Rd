@@ -19,24 +19,29 @@ pt_prep(pt, id_var, remove0 = TRUE, max_val = NULL)
 A data frame with the length of participants not identified as removed.
 }
 \description{
-This function helps users prepare their full or partial purchase task data by:
+This function helps users prepare their full or partial purchase task data. See details for full functionality.
 }
 \details{
-i) identifying and removing participants with missing responses across all items;
-ii) (optional) identifying and removing participants with zero consumption across all items;
-iii) (optional) re-assigning the maximum value allowed at any price point;
-iv) (for purchase tasks which are not administered in full) identifying and removing participants who do not have zero consumption at the final price point (except in instances of the final price point being reached).
+This function will both identify and remove participants:
+
+i) with missing responses across all items;
+
+ii) (optional) with zero consumption across all items; and
+'
+iii) (for purchase tasks which are not administered in full) without zero consumption at the final price point (except in instances of the final price point being reached).
+
+In addition, this function can re-assign the maximum value allowed at any price point.
 }
 \examples{
 
-##### Load Data
+### --- Load Data
 data("cpt_data")
 
-##### Prep Data
+### --- Prep Data
 pt <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
 prices = c("0","0.05","0.10","0.20","0.30","0.40","0.50", "0.75","1","2","3","4","5","7.5","10"))
 
-##### Function Example
-pt2 <- pt_prep(pt, id_var = "ID", remove0 = TRUE, max_val = 99)
+### --- Function Example
+pt2 <- pt_prep(pt, id_var = "ID", remove0 = FALSE, max_val = 99)
 
 }

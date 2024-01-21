@@ -7,10 +7,11 @@
 pt_curve(
   pt,
   id_var,
-  type = c("overall", "group", "individual"),
+  type = NULL,
   k = NULL,
   group_var = NULL,
-  n_start = 10
+  n_starts = 10,
+  id_diagnose = FALSE
 )
 }
 \arguments{
@@ -30,7 +31,11 @@ at the highest price point is 0, the lowest non-zero mean consumption is used.}
 
 \item{group_var}{The name of the grouping variable when `type` equals "group".}
 
-\item{n_start}{The number of starting values of alpha to use for fitting the demand curve when type `equals` "individual". The default is 10, which means}
+\item{n_starts}{The number of starting values of alpha to use for fitting the demand curve when `type` equals "individual". The default is 10.}
+
+\item{id_diagnose}{Whether to identify the first ID number that could not have an individual demand curve successfully fit when `type` equals "individual".
+The default is FALSE. Depending on the type of quality control constraints, non-systematic data could still exist, which will cause errors in curve
+fitting regardless of the number of `n_starts` used.}
 }
 \value{
 A ggplot2 graphical object; For `type` "individual", the original pt data frame plus the derived values for each individual is returned.
@@ -38,21 +43,32 @@ A ggplot2 graphical object; For `type` "individual", the original pt data frame 
 \description{
 This function derives demand functions using the Koffarnus, Franck, Stein, and Bickel, (2015) exponentiated equation. The derived demand indicators from
 these models can be calculated for the entire sample, for sub-groups (using a grouping variable), or for individuals. Visualizations are produced of the
-mean aggregate demand curves when the `type` is either "overall" or "group".
+mean aggregate demand curves when the `type` is either "overall" or "group". See details for additional information on the exponentiated demand equation.
+}
+\details{
+The exponentiated demand curve function put forth by Koffarnus et al. (2015) is used to derive alpha, which is defined as the rate of change in elasticity.
+It is also used to derive Q0 (intensity), and unit elasticity (Pmax). This equation accommodates for values of zero consumption, meaning that these variables
+do not need to have a small constant applied to them prior to being fit. Elasticity (eta) cannot be derived from this or other non-linear equations directly,
+as eta changes depending on the changes in price. Unit elasticity is the point at which a one log-unit increase in price is associated with a one log-unit
+decrease in consumption. Prior to this point, consumption continues to increase alongside increases in price (inelastic demand), whilst after the price
+associated with unit elasticity, consumption continues to decrease rapidly alongside increases in price (elastic demand).
+
+Koffarnus, M. N., Franck, C. T., Stein, J., & Bickel, W. K. (2015). A modified exponential behavioral economic demand model to better describe consumption
+data. Experimental and Clinical Psychopharmacology, 23(6), 504–512. https://doi.org/10.1161/CIRCRESAHA.116.303790
 }
 \examples{
 
-##### Load Data
+### --- Load Data
 data("cpt_data")
 
-##### Prep Data
+### --- Prep Data
 pt <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
 prices = c("0","0.05","0.10","0.20","0.30","0.40","0.50", "0.75","1","2","3","4","5","7.5","10"))
 
 pt2 <- pt_prep(pt, id_var = "ID", remove0 = TRUE, max_val = 99)
-pt3 <- pt_qc(pt2, id_var = "ID", type = "partial", bounce_type = "p2p")
+pt3 <- pt_qc(pt2, id_var = "ID", type = "partial")
 
-##### Function Example
+### --- Function Example
 pt4 <- pt_curve(pt3$data, id_var = "ID", type = "individual")
 
 }

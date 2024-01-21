@@ -9,7 +9,7 @@ pt_qc(
   id_var,
   type = NULL,
   delta_q = 0.025,
-  bounce_type = "initial",
+  bounce_type = "both",
   jump = 0.25,
   bounce_val = 0.1,
   rev_n = 0,
@@ -28,20 +28,20 @@ or zero consumption at the end of a price array. Additionally, for type "partial
 administered.}
 
 \item{delta_q}{The log10-unit reduction in consumption from the first to last price. The default is set to 0.025 (suggested by Stein
-et al., 2015), with values lower than 0.025 deemed non-systematic. If there is zero consumption at intensity (lowest price), participants
+et al., 2015), with values lower than 0.025 deemed non-systematic. If there is zero consumption across all price points, participants
 are not excluded, and instead will be given a delta Q value of NA.}
 
-\item{bounce_type}{The type of bounce criterion applied, one of c("initial","p2p"). The default is "initial", which follows and
-defines what constitutes a `jump`, with all subsequent prices in the purchase task being compared to the consumption at the first
-price. The "p2p" option is a proposed alternative, which considers any increases in consumption from one price to the next to be a
- `jump` in consumption. Both methods make use of the `bounce_val` which will only exclude participants above a set threshold of jumps.}
+\item{bounce_type}{The type of bounce criterion applied, one of c("global","local","both"). The "global" option compares all subsequent prices
+in the purchase task to the consumption at the first price. The "local" option compares a price p to p-1. Both methods make use of the `bounce_val`
+and `jump` value. The default is "both", which applies both the "global" and "local" bounce criteria.}
 
-\item{jump}{Expressed as a proportion, the jump value is the percent increase in consumption at first price used to define an
-excessive increase in consumption. The default is 0.25 (25% as suggested by Stein et al., 2015), meaning that any consumption 25%
-higher than consumption at first price would be considered an excessive jump in consumption when using the `bounce_type` "initial".}
+\item{jump}{Expressed as a proportion, the jump value is the percent increase in consumption used to define an excessive increase in consumption.
+The default is 0.25 (25% as suggested by Stein et al., 2015). For `bounce_type` “global”, consumption greater than 25% higher than consumption at
+first price would be considered an excessive jump in consumption. When using the `bounce_type` “local”, any price p + 1 that is 25% higher than
+price p would be considered an excessive jump in consumption.}
 
-\item{bounce_val}{Expressed as a proportion, the bounce value is used as a threshold to identify excessive inconsistencies in
-responses. The default bounce value is 0.1. IDs exceeding this bounce value are removed.}
+\item{bounce_val}{Expressed as a proportion, the bounce value is used as a threshold to identify excessive inconsistencies in responses. The default
+bounce value is 0.1. IDs exceeding this bounce value are removed.}
 
 \item{rev_n}{The number of acceptable reversals from zero, one of c(0,1). The default number is 0, meaning no reversals from zero
 are allowed.}
@@ -53,29 +53,47 @@ A list consisting of two data frames: "data" which consists of the `id_var` and 
 "qc_data" which provides details on the results of quality control for all IDs.
 }
 \description{
-This function helps users to conduct quality control on purchase task data to remove non-systematic data. Specifically, this function
-identifies and removes IDs with: i) trend violations; ii) excessive bounce ratios; and iii) excessive reversals in responses. Quality
-control options follow the proposed 3-criterion method by Stein et al. (2015), but also allow for customization. Additionally, quality
-control can be applied to purchase task data in which not all prices were administered, such as in the case that administration of the
-purchase task ceased after first breakpoint, or after zero consumption was reached within a price array.
+This function helps users to conduct quality control on purchase task data to remove non-systematic data. See details for specific QC criteria.
 }
 \details{
+Specifically, this function identifies and removes IDs with:
+
+i) trend violations;
+
+ii) excessive bounce ratios; and
+
+iii) excessive reversals in responses.
+
+Quality control options follow the proposed 3-criterion method by Stein et al. (2015), but also allow for customization.
+Additionally, quality control can be applied to purchase task data in which not all prices were administered, such as in
+the case that administration of the purchase task ceased after first breakpoint, or after zero consumption was reached
+within a price array.
+
+Trend violations are identified by delta-Q values lower than the set threshold. Delta-Q is defined as the log10-unit
+reduction in consumption from the first to last price. However, if it was decided (in the `pt_prep()` step) that those with
+zero-consumption across the purchase task would be included, then these participants would have a delta-Q of NA.
+
+There are two methods to identifying excessive bounce ratios: a) increases in consumption at any price compared to the first
+price point; and b) increases in consumption at price p relative to the consumption in the price point preceeding price p (i.e. p - 1).
+
+Excessive reversals in consumption are defined by whether 0 or 1 reversals in consumption are allowed, and whether a reversal
+consists of 1 or 2 consecutive responses of 0 consumption.
+
 Stein, J. S., Koffarnus, M. N., Snider, S. E., Quisenberry, A. J., & Bickel, W. K. (2015).
 Identification and management of nonsystematic purchase task data: Toward best practice.
 Experimental and clinical psychopharmacology, 23(5), 377.
 }
 \examples{
-
-##### Load Data
+### --- Load Data
 data("cpt_data")
 
-##### Prep Data
+### --- Prep Data
 pt <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
 prices = c("0","0.05","0.10","0.20","0.30","0.40","0.50", "0.75","1","2","3","4","5","7.5","10"))
 
 pt2 <- pt_prep(pt, id_var = "ID", remove0 = TRUE, max_val = 99)
 
-##### Function Example
-pt3 <- pt_qc(pt2, id_var = "ID", type = "partial", bounce_type = "p2p")
+### --- Function Example
+pt3 <- pt_qc(pt2, id_var = "ID", type = "partial", bounce_type = "local")
 
 }

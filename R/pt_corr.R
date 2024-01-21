@@ -2,21 +2,26 @@ utils::globalVariables(c("Var1","Var2","coefficient","pval_sign"))
 
 #' `pt_corr()`
 #'
-#' This function will provide coefficients and p-values for a pairwise pearson correlation, and can also produce a heatmap
+#' This function will provide coefficients and p-values for a pairwise Pearson correlation, and can also produce a heatmap.
+#'
 #' @param pt A data frame which includes only variables to be included in the correlation testing.
 #' @param heatmap A logical argument on whether a heatmap should be produced. The default is TRUE.
 #' @param alpha The alpha value to determine significance, in which significant p-values will have the corresponding correlation
-#' coefficient in the heatmap in bold. The default alpha value is 0.05.
+#' coefficient in the heatmap denoted in bold text. The default alpha value is 0.05.
 #' @param coef_size The text size of the coefficients in the heatmap, when the heatmap argument is set to TRUE. Default is 7.
 #' @examples
 #'
-#' ##### Example Data
+#' ### --- Example Data
+#'
 #' pt <- data.frame("ID" = c(1:36),
-#' "Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,7,5,0,2,3,5,6,10,15,12,7,0,9,0,6,7,8,4,5),
-#' "Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,0.5,0.5,0,3,2,2,1,2,3,4,1,0,2,0,5,5,7.5,2,3),
+#' "Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,
+#'                 7,5,0,2,3,5,6,10,15,12,7,0,9,0,6,7,8,4,5),
+#' "Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,
+#'                  0.5,0.5,0,3,2,2,1,2,3,4,1,0,2,0,5,5,7.5,2,3),
 #' "Eta" = c(rnorm(36,0.16,0.19)))
 #'
-#'##### Function Example
+#'### --- Function Example
+#'
 #' pt2 <- pt_corr(pt[c(2:4)])
 #'
 #' @return A data frame with correlation coefficients and p-values for each variable included in the correlation testing. If
@@ -25,7 +30,9 @@ utils::globalVariables(c("Var1","Var2","coefficient","pval_sign"))
 
 pt_corr <- function(pt, heatmap = TRUE, alpha = 0.05, coef_size = 7){
 
-  ### complete or pairwise
+  if(!is.data.frame(pt)) stop(rlang::format_error_bullets(c( x = c("'pt' must be a data frame."))), call. = FALSE)
+
+  ##### ----- Pairwise Correlations
 
   pt <- psych::corr.test(pt, use = "pairwise", method = "pearson")
 
@@ -58,7 +65,9 @@ pt_corr <- function(pt, heatmap = TRUE, alpha = 0.05, coef_size = 7){
   ptcorr_final$pvalue <- format(ptcorr_final$pvalue, scientific = FALSE)
 
   if(heatmap == TRUE){
+
   ### MERGE p-values with the correlation coefficients
+
   corr_dat <- merge(corr_dat[c("Var1","Var2","coefficient")],
                     pval_dat[c("Var1","Var2","pval_sign")], by = c("Var1","Var2"), all = T)
 

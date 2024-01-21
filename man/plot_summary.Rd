@@ -4,15 +4,15 @@
 \alias{plot_summary}
 \title{`plot_summary()`}
 \usage{
-plot_summary(pt, id_var, type = "overall", group_var = NULL)
+plot_summary(pt, id_var, type = NULL, group_var = NULL)
 }
 \arguments{
-\item{pt}{A data frame consisting of the purchase variables for each `id_var` (and the grouping variable if `type` equals "group")}
+\item{pt}{A data frame consisting of the purchase variables for each `id_var` (and the grouping variable if `type` equals "group").}
 
 \item{id_var}{The name of the unique identifier (ID) as found in the data frame.}
 
-\item{type}{The type of plot to produce. One of c("overall","group"). The default is "overall" and provides a summary
-of all individuals in the data frame. The "group" type provides a summary of consumption and expenditure by grouping variable.}
+\item{type}{The type of plot to produce. One of c("overall","group"). The "overall" type provides a summary of all individuals in the data frame. The
+"group" type provides a summary of consumption and expenditure by grouping variable.}
 
 \item{group_var}{The grouping variable if using type "group".}
 }
@@ -20,20 +20,24 @@ of all individuals in the data frame. The "group" type provides a summary of con
 A ggplot2 graphical object
 }
 \description{
-This function helps users to inspect the price-level purchase task data by visualizing the mean and standard error of both consumption and expenditure.
+This function helps users to inspect the price-level purchase task data by visualizing the mean and standard error of both consumption and expenditure
+of either the overall sample or by a grouping variable.
 }
 \examples{
-##### Load Data
+### --- Load Data
+
 data("cpt_data")
 
-##### Prep Data
+### --- Prep Data
+
 pt <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
 prices = c("0","0.05","0.10","0.20","0.30","0.40","0.50", "0.75","1","2","3","4","5","7.5","10"))
 
 pt2 <- pt_prep(pt, id_var = "ID", remove0 = TRUE, max_val = 99)
-pt3 <- pt_qc(pt2, id_var = "ID", type = "partial", bounce_type = "p2p")
+pt3 <- pt_qc(pt2, id_var = "ID", type = "partial")
 
-##### Function Example
-plot_summary(pt3$data, id_var = "ID")
+### --- Function Example
+
+plot_summary(pt3$data, id_var = "ID", type = "overall")
 
 }

@@ -3,9 +3,19 @@ Type: Package
 Title: Package for the Systematic Cleaning, Processing, and Summarizing of Purchase Task Data
 Version: 0.2.0
 Authors@R: c(person("Kyla","Belisario", role = c("cre","aut"), email = "kyla_belisario@protonmail.com", comment = c(ORCID = "0000-0001-5403-9531")),
-    person("James","MacKillop", role = c("aut"), comment = c(ORCID = "0000-0002-8695-1071")))
+    person("James","Murphy", role = c("aut"), comment = c(ORCID = "0000-0001-9378-8754")),
+    person("Michael","Amlung", role = c("aut"), comment = c(ORCID = "0000-0003-4483-7155")),
+    person("Alba","Gonz\'{a}lez-Roz", role = c("aut"), comment = c(ORCID = "0000-0003-4256-4835")),
+    person("James","MacKillop", role = c("aut"), comment = c(ORCID = "0000-0002-8695-1071")),
+    person("Ben","Goodman", role = c("ctb")),
+    person("Meenu","Minhas", role = c("ctb"), comment = c(ORCID = "0000-0001-6741-3940")))
 Description: A series of functions that introduce the steps needed to: i) Pre-process raw purchase task data; ii) Calculate empirical indices and 
-    derived values via equation; iii) Manage index-level indices; and iv) Summarize purchase task indices.
+    derived values via equation; iii) Manage index-level indices; and iv) Summarize purchase task indices. Pre-processing includes detecting non-systematic 
+    data using criteria set forth by Stein et al. (2015). These criteria are customizable for the user, and can accommodate purchase tasks (henceforth PTs) 
+    that are partially administered, such as those administered using an array system or until zero-consumption is reached. Empirically-derived PT indices 
+    (Intensity, Breakpoint, Omax, Pmax) can be calculated from the data directly, as can equation-derived PT indices (alpha, eta, Q0, unit elasticity) using 
+    either the exponentiated demand equation (Koffarnus et al., 2015), or a linear equation.
+BugReports: https://github.com/PBCAR/PThelper/issues
 License: MIT + file LICENSE
 Imports: stats, rlang, nls2, psych, ggplot2, pracma
 Depends: R (>= 3.5.0)

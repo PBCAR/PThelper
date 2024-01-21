@@ -4,53 +4,59 @@
 #'
 #' @param pt A data frame consisting of the purchase variables `pt_vars` to summarize.
 #' @param pt_vars The purchase task variables to summarize.
-#' @param group An optional grouping variable to summarize the purchase task variables by.
+#' @param group_var An optional grouping variable to summarize the purchase task variables by.
 #' @examples
 #'
-#' ##### Example Data
+#' ### --- Example Data
 #' pt <- data.frame("ID" = c(1:36),
-#' "Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,7,5,0,2,3,5,6,10,15,12,7,0,9,0,6,7,8,4,5),
-#' "Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,0.5,0.5,0,3,2,2,1,2,3,4,1,0,2,0,5,5,7.5,2,3))
+#' "Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,
+#'                 7,5,0,2,3,5,6,10,15,12,7,0,9,0,6,7,8,4,5),
+#' "Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,
+#'                  0.5,0.5,0,3,2,2,1,2,3,4,1,0,2,0,5,5,7.5,2,3))
 #'
-#' ##### Function Example
+#' ### --- Function Example
 #' pt_summary(pt, pt_vars = c("Intensity","Breakpoint"))
 #'
 #' @return An object of type data frame
 #' @export
 
-pt_summary <- function(pt, pt_vars, group = NULL){
+pt_summary <- function(pt, pt_vars, group_var = NULL){
 
-  if(is.null(group)){
+  if(!is.data.frame(pt)) stop(rlang::format_error_bullets(c( x = c("'pt' must be a data frame."))), call. = FALSE)
 
-  dat <- data.frame(Name = c(pt_vars),
+  if(is.null(group_var)){
+
+  dat <- data.frame(Variables = c(pt_vars),
                     Mean = c(as.numeric(apply(pt[c(pt_vars)], 2, function(x) mean(x, na.rm = T)))),
                     SE = c(as.numeric(apply(pt[c(pt_vars)], 2, function(x) se(x)))),
                     Min = c(as.numeric(apply(pt[c(pt_vars)], 2, function(x) min(x, na.rm = T)))),
                     Max = c(as.numeric(apply(pt[c(pt_vars)], 2, function(x) max(x, na.rm = T)))))
 }
 
-if(!is.null(group)){
+if(!is.null(group_var)){
 
-  dat_mean <- stats::aggregate(pt[c(pt_vars)], by = list(Group = pt[,group]), function(x) mean(x, na.rm = T))
-  dat_se <- stats::aggregate(pt[c(pt_vars)], by = list(Group = pt[,group]), se)
-  dat_min <- stats::aggregate(pt[c(pt_vars)], by = list(Group = pt[,group]), function(x) min(x, na.rm = T))
-  dat_max <- stats::aggregate(pt[c(pt_vars)], by = list(Group = pt[,group]), function(x) max(x, na.rm = T))
+  names(pt)[names(pt) == group_var] <- "group"
 
-  dat_mean$Group <- paste0("Mean_",dat_mean$Group)
-  dat_se$Group <- paste0("SE_",dat_se$Group)
-  dat_min$Group <- paste0("Min_",dat_min$Group)
-  dat_max$Group <- paste0("Max_",dat_max$Group)
+  dat_mean <- stats::aggregate(pt[c(pt_vars)], by = list(group = pt[,"group"]), function(x) mean(x, na.rm = T))
+  dat_se <- stats::aggregate(pt[c(pt_vars)], by = list(group = pt[,"group"]), se)
+  dat_min <- stats::aggregate(pt[c(pt_vars)], by = list(group = pt[,"group"]), function(x) min(x, na.rm = T))
+  dat_max <- stats::aggregate(pt[c(pt_vars)], by = list(group = pt[,"group"]), function(x) max(x, na.rm = T))
+
+  dat_mean$group <- paste0("Mean_",dat_mean$group)
+  dat_se$group <- paste0("SE_",dat_se$group)
+  dat_min$group <- paste0("Min_",dat_min$group)
+  dat_max$group <- paste0("Max_",dat_max$group)
 
   dat2 <- as.data.frame(t(rbind(dat_mean,dat_se,dat_min,dat_max)))
-  colnames(dat2) <- c(dat2["Group",])
-  dat2$vars <- rownames(dat2)
+  colnames(dat2) <- c(dat2["group",])
+  dat2$Variables <- rownames(dat2)
 
-  group_names <- colnames(dat2)[(colnames(dat2)!="vars")]
+  group_names <- colnames(dat2)[(colnames(dat2)!="Variables")]
 
-  dat <- stats::reshape(as.data.frame(dat2[(dat2$vars!="Group"),]),
-                  idvar = "vars", varying = c(group_names), sep = "_", direction = "long")
+  dat <- stats::reshape(as.data.frame(dat2[(dat2$Variables!="group"),]),
+                  idvar = "Variables", timevar = "Group", varying = c(group_names), sep = "_", direction = "long")
 
-  dat <- dat[order(dat$vars),]
+  dat <- dat[order(dat$Variables),]
 
   }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/pt_empirical.R
 \name{pt_empirical}
 \alias{pt_empirical}
-\title{PT EMPIRICAL}
+\title{`pt_empirical()`}
 \usage{
 pt_empirical(pt, id_var)
 }
@@ -16,4 +16,20 @@ A data frame
 }
 \description{
 This function extracts the empirical demand indices (Intensity, Breakpoint, Omax, and Pmax) from the purchase task.
+}
+\examples{
+
+### --- Load Data
+data("cpt_data")
+
+### --- Prep Data
+pt <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
+prices = c("0","0.05","0.10","0.20","0.30","0.40","0.50", "0.75","1","2","3","4","5","7.5","10"))
+
+pt2 <- pt_prep(pt, id_var = "ID", remove0 = TRUE, max_val = 99)
+pt3 <- pt_qc(pt2, id_var = "ID", type = "partial")
+
+### --- Function Example
+pt4 <- pt_empirical(pt3$data,id_var = "ID")
+
 }

@@ -1,11 +1,12 @@
-#' STANDARD ERROR
+### calculates standard error
+#' `se()`
 #'
 #' @param x An R object.
 #' @noRd
 
 se <- function(x){sqrt(var(x[!is.na(x)])/length(x[!is.na(x)]))}
 
-#' MAXIMUM VALUES
+#' `maxval()`
 #'
 #' @param x An R object.
 #' @noRd
@@ -13,7 +14,7 @@ se <- function(x){sqrt(var(x[!is.na(x)])/length(x[!is.na(x)]))}
 ### replaces max function to surpress warning
 maxval <- function(x) {if (length(x)>0) max(x) else Inf}
 
-#' MINIMUM VALUES
+#' `minval()`
 #'
 #' @param x An R object.
 #' @noRd
@@ -21,7 +22,7 @@ maxval <- function(x) {if (length(x)>0) max(x) else Inf}
 ### replaces min function to surpress warning
 minval <- function(x) {if (length(x)>0) min(x) else Inf}
 
-#' BASE MELT
+#' `base_melt()`
 #'
 #' @param data An R data frame or matrix.
 #' @noRd

@@ -1,11 +1,16 @@
 #' `pt_prep()`
 #'
-#' This function helps users prepare their full or partial purchase task data by:
+#' This function helps users prepare their full or partial purchase task data. See details for full functionality.
 #'
-#' i) identifying and removing participants with missing responses across all items;
-#' ii) (optional) identifying and removing participants with zero consumption across all items;
-#' iii) (optional) re-assigning the maximum value allowed at any price point;
-#' iv) (for purchase tasks which are not administered in full) identifying and removing participants who do not have zero consumption at the final price point (except in instances of the final price point being reached).
+#' This function will both identify and remove participants:
+#'
+#' i) with missing responses across all items;
+#'
+#' ii) (optional) with zero consumption across all items; and
+#''
+#' iii) (for purchase tasks which are not administered in full) without zero consumption at the final price point (except in instances of the final price point being reached).
+#'
+#' In addition, this function can re-assign the maximum value allowed at any price point.
 #'
 #' @param pt A data frame consisting of the `id_var` and purchase task variables.
 #' @param id_var The name of the unique identifier (ID) as found in the data frame.
@@ -13,14 +18,14 @@
 #' @param max_val Optional identification of a maximum allowed response for any given price point.
 #' @examples
 #'
-#' ##### Load Data
+#' ### --- Load Data
 #' data("cpt_data")
 #'
-#' ##### Prep Data
+#' ### --- Prep Data
 #' pt <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
 #' prices = c("0","0.05","0.10","0.20","0.30","0.40","0.50", "0.75","1","2","3","4","5","7.5","10"))
 #'
-#' ##### Function Example
+#' ### --- Function Example
 #' pt2 <- pt_prep(pt, id_var = "ID", remove0 = FALSE, max_val = 99)
 #'
 #' @return A data frame with the length of participants not identified as removed.
@@ -28,20 +33,27 @@
 
 pt_prep <- function(pt, id_var, remove0 = TRUE, max_val = NULL) {
 
+  if(!is.data.frame(pt)) stop(rlang::format_error_bullets(c( x = c("'pt' must be a data frame."))), call. = FALSE)
+
   prices <- names(pt)[names(pt)!=id_var]
   names(pt)[names(pt) == id_var] <- "id"
+
+  suppressWarnings({
+    if(length(prices[is.na(as.numeric(prices))])==length(prices)) stop(rlang::format_error_bullets(c( x = c("Names of purchase task variables must be numeric. Use `price_prep()` to rename variables."))), call. = FALSE)
+    if(length(prices[is.na(as.numeric(prices))])>0) stop(rlang::format_error_bullets(c( x = c("Variables other than 'id_var' and the purchase task items are detected. Please include only the variables required."))), call. = FALSE)
+  })
 
   ### WARNING: Duplicate IDs are not allowed
 
   dupe_id <- unique(pt$id)
 
-  if(length(dupe_id)!=length(pt$id)) stop(rlang::format_error_bullets(c( x = "Duplicate IDs detected!")), call. = FALSE)
+  if(length(dupe_id)!=length(pt$id)) stop(rlang::format_error_bullets(c( x = "Duplicate IDs detected.")), call. = FALSE)
 
   ##### ----- MAX VALUE
 
   if(!is.null(max_val)){
 
-    # RE-CODE values > the max value as == to the max value
+    ### RE-CODE values > the max value as == to the max value
     pt[,c(prices)][pt[,c(prices)] > max_val] <- max_val
 
   }
@@ -71,9 +83,7 @@ pt_prep <- function(pt, id_var, remove0 = TRUE, max_val = NULL) {
 
       pt <- pt[!(pt$id %in% remove.id.zero),]
 
-      }
-
-    if(remove0==FALSE){
+      } else if(remove0==FALSE){
       remove.id.zero <- NULL
     }
 
@@ -101,14 +111,13 @@ pt_prep <- function(pt, id_var, remove0 = TRUE, max_val = NULL) {
                                          " " = c(paste(remove.id.missing, collapse = ",")),
                                          i = c("IDs with zero consumption:"),
                                          " " = c(paste(remove.id.zero, collapse = ",")),
-                                         i = c("IDs not reaching zero consumption (does not include IDs who reach max item):"),
+                                         i = c("IDs not reaching zero consumption (does not include IDs who reach end of purchase task):"),
                                          " " = c(paste(remove.id.nonzero, collapse = ",")))))
-  }
 
-  if(remove0==FALSE){
+  } else if(remove0==FALSE){
     message(rlang::format_error_bullets(c( i = c("IDs with Missing Values:"),
                                            " " = c(paste(remove.id.missing, collapse = ",")),
-                                           i = c("IDs not reaching zero consumption (does not include IDs who reach max item):"),
+                                           i = c("IDs not reaching zero consumption (does not include IDs who reach end of purchase task):"),
                                            " " = c(paste(remove.id.nonzero, collapse = ",")))))
 
   }

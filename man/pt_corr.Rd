@@ -2,7 +2,7 @@
 % Please edit documentation in R/pt_corr.R
 \name{pt_corr}
 \alias{pt_corr}
-\title{PT CORR}
+\title{`pt_corr()`}
 \usage{
 pt_corr(pt, heatmap = TRUE, alpha = 0.05, coef_size = 7)
 }
@@ -12,7 +12,7 @@ pt_corr(pt, heatmap = TRUE, alpha = 0.05, coef_size = 7)
 \item{heatmap}{A logical argument on whether a heatmap should be produced. The default is TRUE.}
 
 \item{alpha}{The alpha value to determine significance, in which significant p-values will have the corresponding correlation
-coefficient in the heatmap in bold. The default alpha value is 0.05.}
+coefficient in the heatmap denoted in bold text. The default alpha value is 0.05.}
 
 \item{coef_size}{The text size of the coefficients in the heatmap, when the heatmap argument is set to TRUE. Default is 7.}
 }
@@ -21,5 +21,21 @@ A data frame with correlation coefficients and p-values for each variable includ
 heatmap is set to TRUE, then a ggplot2 graphical object is also returned.
 }
 \description{
-This function will provide coefficients and p-values for a pairwise pearson correlation, and can also produce a heatmap
+This function will provide coefficients and p-values for a pairwise Pearson correlation, and can also produce a heatmap.
+}
+\examples{
+
+### --- Example Data
+
+pt <- data.frame("ID" = c(1:36),
+"Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,
+                7,5,0,2,3,5,6,10,15,12,7,0,9,0,6,7,8,4,5),
+"Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,
+                 0.5,0.5,0,3,2,2,1,2,3,4,1,0,2,0,5,5,7.5,2,3),
+"Eta" = c(rnorm(36,0.16,0.19)))
+
+### --- Function Example
+
+pt2 <- pt_corr(pt[c(2:4)])
+
 }

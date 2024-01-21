@@ -4,12 +4,14 @@
 \alias{plot_transform}
 \title{`plot_transform()`}
 \usage{
-plot_transform(pt, pt_var)
+plot_transform(pt, pt_var, zero_val = 0.001)
 }
 \arguments{
 \item{pt}{A data frame consisting of the purchase variable `pt_var` to visualize.}
 
 \item{pt_var}{The name of the purchase task index-level variable to visualize, as identified in the data frame.}
+
+\item{zero_val}{The small constant value to add to zero-value responses to allow for transformation. The default is 0.001.}
 }
 \value{
 A ggplot2 graphical object
@@ -20,12 +22,16 @@ log10 or square-root would be best to use.
 }
 \examples{
 
-##### Example Data
-pt <- data.frame("ID" = c(1:30),
-"Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,7,5,0,20,30,5,6,10,15,12,7,0,9),
-"Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,0.5,0.5,0,10,10,2,1,2,3,4,1,0,2))
+### --- Example Data
 
-##### Function Example
+pt <- data.frame("ID" = c(1:36),
+"Intensity" = c(10,12,15,0,99,11,7,6,12,7,8,10,5,6,10,0,3,
+                7,5,0,2,3,5,6,10,15,12,7,0,9,0,6,7,8,4,5),
+"Breakpoint" = c(1,2,5,0,10,3,0.5,0.2,0.3,3,4,5,7.5,0.5,2,0,0.1,
+                 0.5,0.5,0,3,2,2,1,2,3,4,1,0,2,0,5,5,7.5,2,3))
+
+### --- Function Example
+
 plot_transform(pt,pt_var = "Breakpoint")
 
 }
