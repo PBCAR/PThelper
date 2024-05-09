@@ -1,0 +1,221 @@
+---
+title: "Introduction to PThelper"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to PThelper}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, echo=FALSE, message=FALSE, results='hide'}
+knitr::opts_chunk$set(fig.align = "center",fig.height = 5.75,fig.width = 7,fig.retina = 3)
+```
+
+This package is designed to walk users through the various steps required to prepare, clean, process, and summarize purchase task (henceforth PT) data in great detail. The benefit of this package is that it provides a standardized framework (see González-Roz et al., 2023 for more information on procedural and methodological reporting guidelines) for processing PT data, improving reproducibility. By providing customizable functions, the decisions which researchers need to make to process PT data also lends itself as a learning tool.
+
+The package offers functions for all aspects of PT processing:
+
+i) The pre-processing of the raw data including quality control;
+
+ii) The calculation of empirical indicators and derived indicators via equation;
+
+iii) Indicator-level variable management; and
+
+iv) Descriptive statistics and visualizations.
+
+Example Cigarette Purchase Task (CPT) data (`cpt_data`) are provided by this package. This data consists of 100 fictional participants, 15 different prices ranging from free (\$0) to \$10 per cigarette, and follows a partially-administered method using arrays of 3. Examples using each function in order for typical processing are demonstrated using this data in detail below.
+
+## Introduction to Purchase Tasks
+
+These demand instruments are used to measure the relative reinforcement of a substance - the extent to which a value for a commodity is effected by increased cost. Greater demand (i.e. little sensitivity to changes in price) is often associated with substance-related problems and use disorders (see Bickel et al., 2011). The most commonly used indicators generated from the purchase task are (Murphy & MacKillop, 2006; Gilroy et al., 2020):
+
+**Breakpoint** -- The first increment of cost with zero consumption
+
+**Intensity (Q0 derived)** -- Consumption at zero (or negligible) cost
+
+**Omax** -- The maximum expenditure at a single price
+
+**Pmax** -- The price associated with the maximum expenditure (approximation of unit elasticity)
+
+**Unit Elasticity (derived)** -- The price at which consumption is neither inelastic nor elastic (it is here that a one log-unit increase in price is associated with a one log-unit decrease in consumption)
+
+**Alpha (derived)** -- Rate of change constant in consumption relative to price
+
+**Eta (derived)** -- The % decrease in consumption associated with a 1% increase in price
+
+## i) Pre-Processing
+
+Purchase task processing requires preparation, and using the `price_prep()`, `pt_prep()`, and `pt_qc()` functions will ensure the proper cleaning of the data prior to calculating the PT indicators. The `plot_summary()` function can be used at the end of the pre-processing stage to visualize the consumption and expenditure across the prices of the PT.
+
+### price_prep()
+
+This function helps users to rename the variables to reflect the prices they represent, which is required in order to process PT data in subsequent steps.
+
+```{r}
+library(PThelper)
+data("cpt_data")
+
+pt <- price_prep(cpt_data, id_var = "ID", vars = c(paste0("cpt",1:15)),
+                 prices = c("0","0.05","0.10","0.20","0.30","0.40","0.50","0.75","1","2","3","4","5","7.5","10"))
+```
+
+### pt_prep()
+
+This function prepares fully- or partially-administered PT data by identifying and removing participants with missing responses across all items. Additionally, it will also identify and remove those who have missing responses at any price point (full PT), or those with a missing value prior to breakpoint (partial PT). For partially-administered PTs, this function will remove those who do not reach zero consumption by the final price point (unless this is the final price point of the purchase task). Optionally, the function can also remove those with zero consumption across all items, and can re-assign the maximum value allowed at any price point. A summary of the IDs who were removed using the `pt_prep()` function are printed to the console:
+
+```{r,echo=TRUE}
+pt2 <- pt_prep(pt, id_var = "ID", type = "partial", max_val = 99)
+```
+
+### pt_qc()
+
+This function is used to apply quality control to fully- or partially-administered PT data by removing those with trend violations; excessive bounce ratios; and excessive reversals in responses. Quality control criteria follow the proposed 4-step criterion, a modified version of the 3-step method put forth by Stein et al. (2015). A summary of the IDs who do not pass quality control using the `pt_qc()` function are printed to the console:
+
+```{r}
+pt3 <- pt_qc(pt2, id_var = "ID", type = "partial")
+```
+
+Furthermore, delta-Q values, global and local bounce ratios, and the presence of reversals are printed for all individuals (included and excluded), and can be seen in the second data frame ("qc_data") of the returned list:
+
+```{r}
+## First 10 IDs:
+pt3$qc_data[1:10,]
+```
+
+### plot_summary()
+
+This function helps users visually inspect both consumption and expenditure across the prices of the PT, either for the overall sample or by a grouping variable. The maximum consumption and maximum expenditure will be printed out to the console:
+
+```{r}
+plot_summary(pt3$data, type = "overall", id_var = "ID")
+```
+
+## ii) Calculating Elasticity and Empirical Values
+
+Measures related to elasticity can be obtained by fitting a demand curve using the exponentiated equation (`pt_curve()`), a mixed effects exponentiated equation (`pt_curve_mixed()`), or ln-ln equation (`pt_linear()`). The area-under-the-curve can also be calculated by using the `pt_auc()` function. Values calculated empirically can be obtained using the `pt_empirical()` function.
+ 
+## pt_curve()
+
+This function can be used to calculate and visualize a demand curve using the exponentiated equation (Koffarnus et al., 2015) for the entire sample or by a grouping variable. It can also be used to fit individual demand curves in order to derive demand indicators for each individual including alpha, intensity (Q0), and Pmax (unit elasticity). Derived values from the curve will be printed to the console along with a definition to remind users:
+
+```{r}
+pt_curve(pt3$data,"ID", type = "overall")
+```
+
+When fitting an individual demand curve for each individual, definitions and the calculated k-value (if not manually selected) will be printed to the console. Additionally, any participants whose Q0 and alpha values could not be estimated freely and instead rely upon the best fit via brute-force fitting, will be identified:
+
+```{r}
+pt5 <- pt_curve(pt3$data, id_var = "ID", type = "individual")
+```
+
+### pt_curve_mixed()
+
+This function provides an alternative method for calculating the demand curve of the entire sample by taking into consideration random effects, and utilizes the approach set forth by Kaplan et al., (2021):
+
+```{r}
+pt_curve_mixed(pt3$data, id_var = "ID", type = "overall")
+```
+
+### pt_linear()
+
+This function can be used to calculate and visualize a linear demand curve using the ln-ln equation (Gilroy et al., 2020) for the entire sample or by a grouping variable. It can also be used to fit individual demand curves in order to derive eta for each individual. Eta, a definition of eta, and R-squared will be printed to the console:
+
+```{r}
+pt_linear(pt3$data, id_var = "ID", type = "overall")
+```
+
+### pt_auc()
+
+This function can be used to calculate the area-under-the-curve (Amlung et al., 2015) for the entire sample or by grouping variable. Additionally, it can be used to calculate AUC for each individual. The calculated AUC will be printed to the console:
+
+```{r}
+pt_auc(pt3$data, id_var = "ID", type = "overall", qmax = 99)
+```
+
+### pt_empirical()
+
+This function can be used to calculate the empirical values Intensity, Breakpoint, and Omax.
+
+```{r}
+pt6 <- pt_empirical(pt5, id_var = "ID")
+```
+
+## iii) Indicator-Level Management
+
+Outlier management of a specific indicator variable can be achieved using the `pt_winsor()` function. The changes made to the indicator-level variable (in this instance, Intensity) are identified by ID, and can be seen in the second data frame ("wins_table") of returned list:
+
+```{r}
+pt7 <- pt_winsor(pt6, id_var = "ID", w_var = "Intensity", delta = 1)
+pt7[["wins_table"]]
+```
+
+## iv) Diagnostics & Descriptives
+
+## plot_diagnostics()
+
+This function is useful during any part of PT processing. It can be used to diagnose individual demand by visualizing empirical consumption (for example, to check quality of data after QC has been applied), or to visualize fitted demand curves (linear or exponentiated). All participants can be visualized on an N row by N column grid. Alternatively for fitted demand curves, a subset of those with a poor R\^2 value or those exceeding a set number of standard deviations away from the mean (z-score) can be visualized.
+
+```{r}
+plot_diagnostics(pt5, id_var = "ID", type = "curve", diagnostics = "zscore")
+```
+
+### pt_summary()
+
+Overall descriptive (N total, N missing, mean, SE, minimum, and maximum) summaries of indicator-level variables can be calculated. Descriptive statistics can also be provided by a grouping variable. The function produces a data frame that is easy to export:
+
+```{r}
+dat_out <- pt_summary(pt6, pt_vars = c("Alpha","Intensity","Breakpoint","Omax"))
+dat_out
+```
+
+### pt_corr()
+
+This function provides pairwise Pearson correlation coefficients and p-values of the purchase task indicators. It can also produce a heatmap:
+
+```{r}
+dat_corr <- pt_corr(pt6[c("Intensity","Breakpoint","Omax","Alpha")])
+```
+
+## pt_transform()
+
+This function provides summary statistics regarding skew, kurtosis, as well as minimum and maximum z-scores of the untransformed purchase task indicator, as well as summary statistics for the indicator's log and square root transformation. It can also produce a plot showing the distribution of the untransformed, log, and square root transformation of the indicator:
+
+```{r}
+pt_transform(pt6,"Intensity")
+```
+
+## Processing by Grouping Variable
+
+Several PThelper functions will process data by a grouping variable, making it easier to visualize group differences. All take "group" as the argument for `type`, with the grouping variable identified using the `group_var` argument.
+
+Visualizing consumption and expenditure by group can be achieved using the `plot_summary()` function:
+
+```{r}
+ptg <- pt3$data
+ptg$GROUP <- ifelse(grepl("A",ptg$ID),"A","B")
+plot_summary(ptg, type = "group", id_var = "ID", group_var = "GROUP")
+```
+
+Demand-related calculations such as alpha, eta, and AUC can also be calculated by a grouping variable. For example, to calculate alpha and Q0 for each group, the `pt_curve()` function can be used:
+
+```{r}
+pt_curve(ptg,id_var = "ID",type = "group", group_var = "GROUP")
+```
+
+## References
+
+Amlung, M., Yurasek, A., McCarty, K. N., MacKillop, J., & Murphy, J. G. (2015). Area under the curve as a novel metric of behavioral economic demand for alcohol. Experimental and clinical psychopharmacology, 23(3), 168.
+
+Bickel, Warren K, David P Jarmolowicz, E Terry Mueller, and Kirstin M Gatchalian. (2011). "The Behavioral Economics and Neuroeconomics of Reinforcer Pathologies: Implications for Etiology and Treatment of Addiction." Current Psychiatry Reports 13 (5): 406--15.
+
+Gilroy, S. P., Kaplan, B. A., & Reed, D. D. (2020). Interpretation (s) of elasticity in operant demand. Journal of the Experimental Analysis of Behavior, 114(1), 106-115.
+
+González-Roz, A., Martínez-Loredo, V., Aston, E. R., Metrik, J., Murphy, J., Balodis, I., Secades-Villa, R., Belisario, K., & MacKillop, J. (2023). Concurrent validity of the marijuana purchase task: a meta-analysis of trait-level cannabis demand and cannabis involvement. Addiction (Abingdon, England), 118(4), 620--633. <https://doi.org/10.1111/add.16075>
+
+Kaplan, B. A., Franck, C. T., McKee, K., Gilroy, S. P., & Koffarnus, M. N. (2021). Applying Mixed-Effects Modeling to Behavioral Economic Demand: An Introduction. Perspectives on behavior science, 44(2-3), 333--358. <https://doi.org/10.1007/s40614-021-00299-7>
+
+Koffarnus, M. N., Franck, C. T., Stein, J. S., & Bickel, W. K. (2015). A modified exponential behavioral economic demand model to better describe consumption data. Experimental and Clinical Psychopharmacology, 23 (6), 504-512. <http://dx.doi.org/10.1037/pha0000045>
+
+Murphy, J. G., & MacKillop, J. (2006). Relative reinforcing efficacy of alcohol among college student drinkers. Experimental and clinical psychopharmacology, 14(2), 219.
+
+Stein, J. S., Koffarnus, M. N., Snider, S. E., Quisenberry, A. J., & Bickel, W. K. (2015). Identification and management of nonsystematic purchase task data: Toward best practice. Experimental and clinical psychopharmacology, 23(5), 377.

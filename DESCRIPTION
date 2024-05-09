@@ -1,0 +1,29 @@
+Package: PThelper
+Type: Package
+Title: Systematic Cleaning, Processing, and Summarizing of Behavioral Economic Purchase Task Data
+Version: 0.3.0
+Authors@R: c(
+  person("Kyla","Belisario", role = c("cre","aut"), email = "kyla_belisario@protonmail.com", comment = c(ORCID = "0000-0001-5403-9531")),
+  person("Michael","Amlung", role = c("aut"), comment = c(ORCID = "0000-0003-4483-7155")),
+  person("Alba","Gonz\'{a}lez-Roz", role = c("aut"), comment = c(ORCID = "0000-0003-4256-4835")),
+  person("James","Murphy", role = c("aut"), comment = c(ORCID = "0000-0001-9378-8754")),
+  person("Ben","Goodman", role = c("ctb")),
+  person("Meenu","Minhas", role = c("ctb"), comment = c(ORCID = "0000-0001-6741-3940")),
+  person("James","MacKillop", role = c("aut"), comment = c(ORCID = "0000-0002-8695-1071")))
+Description: A series of functions that introduce the steps needed to: i) Pre-process raw purchase task data; ii) Calculate empirical indicators from the data or derive values via equation; 
+     iii) Manage calculated indicators; and iv) Summarize purchase task indicators. Pre-processing includes detecting non-systematic data using a 4-criterion method, a modified version of the 
+     3-criterion method set forth by Stein et al. (2015). These criteria are customizable for the user, and can accommodate purchase tasks that are partially-administered, such as those 
+     administered using an array method or until zero-consumption is reached. Empirically-derived purchase tasks indicators (Intensity, Breakpoint, Omax, Pmax) can be calculated from the data 
+     directly, as can equation-derived purchase tasks indicators (alpha, eta, Q0, unit elasticity, AUC) using the exponentiated demand equation (Koffarnus et al., 2015), a linear equation, or 
+     area-under-the-curve (Amlung et al., 2015).
+BugReports: https://github.com/PBCAR/PThelper/issues
+License: MIT + file LICENSE
+Imports: stats, rlang, nls2, nlme, ggplot2, pracma
+Depends: R (>= 3.5.0)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
